@@ -1,0 +1,43 @@
+name: Deploy to remote server
+
+on:
+  push:
+    branches: [ main ]
+  workflow_dispatch: {}
+
+jobs:
+  deploy:
+    name: Deploy via rsync over SSH
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Start ssh-agent and add private key
+        uses: webfactory/ssh-agent@v0.7.0
+        with:
+          ssh-private-key: ${{ secrets.SSH_PRIVATE_KEY }}
+
+      - name: Add remote host to known_hosts
+        run: |
+          mkdir -p ~/.ssh
+          PORT=${{ secrets.SERVER_PORT }}
+          if [ -z "$PORT" ]; then PORT=22; fi
+          ssh-keyscan -p "$PORT" "${{ secrets.SERVER_HOST }}" >> ~/.ssh/known_hosts
+
+      - name: Rsync repository to remote server
+        env:
+          TARGET_DIR: ${{ secrets.TARGET_DIR }}
+          SERVER_USER: ${{ secrets.SERVER_USER }}
+          SERVER_HOST: ${{ secrets.SERVER_HOST }}
+          SERVER_PORT: ${{ secrets.SERVER_PORT }}
+        run: |
+          PORT=${SERVER_PORT:-22}
+          export RSYNC_RSH="ssh -p $PORT -o StrictHostKeyChecking=yes"
+
+          # 同步仓库当前工作目录到目标目录（排除 .git 和 workflow 文件夹）
+          rsync -avz --delete \
+            --exclude='.git' \
+            --exclude='.github' \
+            ./ ${SERVER_USER}@${SERVER_HOST}:${TARGET_DIR}
