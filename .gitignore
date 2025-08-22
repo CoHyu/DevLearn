@@ -4,5 +4,111 @@
 # 以问号“?”通配单个字符
 # 以方括号“[]”包含单个字符的匹配列表；
 # 以叹号“!”表示不忽略(跟踪)匹配到的文件或目录；
+# macOS
+.DS_Store
 
-/temp/*
+# Windows
+Thumbs.db
+ehthumbs.db
+Desktop.ini
+
+# Logs
+*.log
+logs/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+
+# Node
+node_modules/
+dist/
+build/
+out/
+.cache/
+coverage/
+*.tgz
+
+# Python
+__pycache__/
+*.py[cod]
+*.pyo
+*.pyd
+*.python-version
+venv/
+.venv/
+env/
+ENV/
+pip-wheel-metadata/
+*.egg-info/
+build/
+dist/
+
+# Go
+vendor/
+bin/
+*.exe
+*.exe~
+*.test
+*.out
+
+# Rust
+target/
+
+# Java / JVM
+*.class
+*.jar
+*.war
+*.ear
+target/
+*.iml
+
+# IDEs / Editors
+.vscode/
+.idea/
+*.suo
+*.ntvs*
+*.njsproj
+*.sln
+*.sw?
+*.code-workspace
+
+# Devcontainers
+.devcontainer/
+
+# Docker
+Dockerfile*
+docker-compose*.yml
+
+# Terraform
+.terraform/
+*.tfstate
+*.tfstate.backup
+crash.log
+override.tf
+override.tf.json
+
+# Kubernetes
+.kube/
+
+# Secrets / environment
+.env
+.env.local
+.env.*.local
+secrets/
+credentials/
+*.pem
+*.key
+
+# Archives / packages
+*.zip
+*.tar.gz
+*.rar
+*.7z
+
+# Misc
+coverage/
+*.cover
+*.pid
+*.seed
+*.log
