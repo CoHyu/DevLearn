@@ -1,4 +1,4 @@
-from python_basic.src.Passwd_checker import Passwd_checker_1
+from src.Passwd_checker import Passwd_checker_1
 
 if __name__ == "__main__":
     passwd = input("Type in your PASSWD:")
