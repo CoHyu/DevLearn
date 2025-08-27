@@ -1,0 +1,390 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Header 伪造技术演示 - 仅供学习</title>
+    <style>
+      * {
+        box-sizing: border-box;
+        margin: 0;
+        padding: 0;
+        font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+      }
+
+      body {
+        background-color: #f5f7fa;
+        color: #333;
+        line-height: 1.6;
+        padding: 20px;
+      }
+
+      .container {
+        max-width: 1200px;
+        margin: 0 auto;
+        background: white;
+        border-radius: 12px;
+        box-shadow: 0 5px 20px rgba(0, 0, 0, 0.1);
+        overflow: hidden;
+      }
+
+      header {
+        background: linear-gradient(135deg, #246bfd 0%, #5089ff 100%);
+        color: white;
+        padding: 25px 30px;
+        text-align: center;
+      }
+
+      h1 {
+        font-size: 28px;
+        margin-bottom: 10px;
+      }
+
+      .subtitle {
+        font-size: 16px;
+        opacity: 0.9;
+        max-width: 800px;
+        margin: 0 auto;
+      }
+
+      .warning {
+        background-color: #ffebee;
+        border-left: 4px solid #f44336;
+        padding: 15px;
+        margin: 20px;
+        border-radius: 4px;
+        font-size: 14px;
+      }
+
+      .content {
+        display: flex;
+        flex-wrap: wrap;
+        padding: 20px;
+      }
+
+      .controls {
+        flex: 1;
+        min-width: 300px;
+        padding: 20px;
+        background: #f9f9f9;
+        border-radius: 8px;
+      }
+
+      .preview {
+        flex: 2;
+        min-width: 400px;
+        padding: 20px;
+      }
+
+      .form-group {
+        margin-bottom: 20px;
+      }
+
+      label {
+        display: block;
+        margin-bottom: 8px;
+        font-weight: 600;
+        color: #246bfd;
+      }
+
+      input[type="text"] {
+        width: 100%;
+        padding: 12px;
+        border: 1px solid #ddd;
+        border-radius: 6px;
+        font-size: 14px;
+        transition: border 0.3s;
+      }
+
+      input[type="text"]:focus {
+        border-color: #246bfd;
+        outline: none;
+        box-shadow: 0 0 0 2px rgba(36, 107, 253, 0.2);
+      }
+
+      button {
+        background: #246bfd;
+        color: white;
+        border: none;
+        padding: 12px 20px;
+        border-radius: 6px;
+        cursor: pointer;
+        font-size: 16px;
+        font-weight: 600;
+        transition: background 0.3s;
+        width: 100%;
+        margin-top: 10px;
+      }
+
+      button:hover {
+        background: #1b5ace;
+      }
+
+      .iframe-container {
+        border: 1px solid #ddd;
+        border-radius: 8px;
+        overflow: hidden;
+        height: 500px;
+        background: #f9f9f9;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        position: relative;
+      }
+
+      iframe {
+        width: 100%;
+        height: 100%;
+        border: none;
+      }
+
+      .placeholder {
+        color: #888;
+        text-align: center;
+        padding: 20px;
+      }
+
+      .response-info {
+        margin-top: 20px;
+        padding: 15px;
+        background: #f9f9f9;
+        border-radius: 8px;
+        font-size: 14px;
+      }
+
+      .success {
+        color: #28a745;
+      }
+
+      .error {
+        color: #dc3545;
+      }
+
+      footer {
+        text-align: center;
+        padding: 20px;
+        color: #666;
+        font-size: 14px;
+        border-top: 1px solid #eee;
+      }
+
+      .tabs {
+        display: flex;
+        margin-bottom: 20px;
+        border-bottom: 1px solid #ddd;
+      }
+
+      .tab {
+        padding: 10px 20px;
+        cursor: pointer;
+        border-bottom: 3px solid transparent;
+      }
+
+      .tab.active {
+        border-bottom: 3px solid #246bfd;
+        font-weight: 600;
+      }
+
+      .tab-content {
+        display: none;
+      }
+
+      .tab-content.active {
+        display: block;
+      }
+
+      @media (max-width: 768px) {
+        .content {
+          flex-direction: column;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <div class="container">
+      <header>
+        <h1>Header 伪造技术演示</h1>
+        <p class="subtitle">
+          本页面仅供学习如何通过修改 HTTP headers 来尝试绕过 iframe
+          限制，请勿用于非法用途
+        </p>
+      </header>
+
+      <div class="warning">
+        <strong>重要声明：</strong
+        >此演示仅用于教育目的，帮助开发者理解浏览器安全机制。未经授权尝试绕过网站安全措施可能违反法律法规或网站的使用条款。现代浏览器有严格的安全策略，大多数情况下无法绕过X-Frame-Options和CSP限制。
+      </div>
+
+      <div class="content">
+        <div class="controls">
+          <h2>自定义请求头</h2>
+          <p>尝试添加或修改 HTTP 请求头以绕过 iframe 限制：</p>
+
+          <div class="tabs">
+            <div class="tab active" data-tab="headers">Headers</div>
+            <div class="tab" data-tab="explanation">技术说明</div>
+          </div>
+
+          <div class="tab-content active" id="headers-tab">
+            <div class="form-group">
+              <label for="userAgent">User-Agent</label>
+              <input
+                type="text"
+                id="userAgent"
+                value="Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36"
+              />
+            </div>
+
+            <div class="form-group">
+              <label for="referer">Referer</label>
+              <input type="text" id="referer" value="https://example.com" />
+            </div>
+
+            <div class="form-group">
+              <label for="origin">Origin</label>
+              <input type="text" id="origin" value="https://example.com" />
+            </div>
+
+            <div class="form-group">
+              <label for="xForwardedFor">X-Forwarded-For</label>
+              <input type="text" id="xForwardedFor" value="192.168.1.1" />
+            </div>
+
+            <button id="loadButton">尝试加载页面</button>
+
+            <div class="response-info">
+              <p>状态: <span id="status">未发送请求</span></p>
+              <p>响应: <span id="response">-</span></p>
+            </div>
+          </div>
+
+          <div class="tab-content" id="explanation-tab">
+            <h3>技术说明</h3>
+            <p>网站通常使用以下方式防止被嵌入 iframe：</p>
+            <ul>
+              <li>
+                <strong>X-Frame-Options</strong> - 控制页面是否可以在frame中显示
+              </li>
+              <li>
+                <strong>Content-Security-Policy</strong> (frame-ancestors) -
+                更现代的安全策略
+              </li>
+              <li>
+                <strong>JavaScript 检测</strong> - 检查 window.top !==
+                window.self
+              </li>
+            </ul>
+
+            <h3>浏览器限制</h3>
+            <p>现代浏览器对跨域请求有严格限制：</p>
+            <ul>
+              <li>无法修改某些受保护的headers（如Origin、Referer等）</li>
+              <li>X-Frame-Options和CSP策略由浏览器强制执行</li>
+              <li>即使使用服务器代理，也可能遇到其他安全措施</li>
+            </ul>
+
+            <h3>合法替代方案</h3>
+            <p>如果需要嵌入第三方内容，考虑：</p>
+            <ul>
+              <li>使用官方提供的嵌入代码（如YouTube、Twitter等）</li>
+              <li>申请API访问权限</li>
+              <li>联系网站所有者获取嵌入许可</li>
+            </ul>
+          </div>
+        </div>
+
+        <div class="preview">
+          <h2>页面预览</h2>
+          <div class="iframe-container">
+            <div class="placeholder" id="placeholder">
+              输入自定义头部信息后点击"尝试加载页面"<br /><br />
+              <small>注意: 由于浏览器安全限制，实际可能无法加载目标网站</small>
+            </div>
+            <iframe id="siteFrame" style="display: none"></iframe>
+          </div>
+
+          <div class="response-info">
+            <h3>为什么无法加载 chat.deepseek.com？</h3>
+            <p>chat.deepseek.com 可能使用了以下安全措施：</p>
+            <ul>
+              <li>设置了 X-Frame-Options: SAMEORIGIN 或 DENY</li>
+              <li>使用了 Content-Security-Policy 的 frame-ancestors 指令</li>
+              <li>使用了 JavaScript 框架检测并阻止嵌入</li>
+            </ul>
+            <p>这些安全措施由浏览器强制执行，无法通过客户端JavaScript绕过。</p>
+          </div>
+        </div>
+      </div>
+
+      <footer>
+        <p>本演示仅用于教育目的 | 实际环境中，绕过安全措施可能违反法律法规</p>
+        <p>© 2023 安全研究演示 | 作者: 安全研究员</p>
+      </footer>
+    </div>
+
+    <script>
+      // 选项卡功能
+      document.querySelectorAll(".tab").forEach((tab) => {
+        tab.addEventListener("click", () => {
+          document
+            .querySelectorAll(".tab")
+            .forEach((t) => t.classList.remove("active"));
+          document
+            .querySelectorAll(".tab-content")
+            .forEach((c) => c.classList.remove("active"));
+
+          tab.classList.add("active");
+          document
+            .getElementById(`${tab.dataset.tab}-tab`)
+            .classList.add("active");
+        });
+      });
+
+      // 加载按钮功能
+      document
+        .getElementById("loadButton")
+        .addEventListener("click", function () {
+          const userAgent = document.getElementById("userAgent").value;
+          const referer = document.getElementById("referer").value;
+          const origin = document.getElementById("origin").value;
+          const xForwardedFor = document.getElementById("xForwardedFor").value;
+
+          const frame = document.getElementById("siteFrame");
+          const placeholder = document.getElementById("placeholder");
+          const statusElement = document.getElementById("status");
+          const responseElement = document.getElementById("response");
+
+          // 显示加载中状态
+          statusElement.textContent = "加载中...";
+          statusElement.className = "";
+          responseElement.textContent = "-";
+
+          // 尝试使用自定义头部加载页面
+          try {
+            // 注意：在实际环境中，浏览器会限制修改某些请求头
+            // 这里只是演示，实际上无法直接通过JavaScript设置这些头部
+
+            // 显示iframe，隐藏占位符
+            frame.style.display = "block";
+            placeholder.style.display = "none";
+
+            // 由于浏览器安全限制，我们无法直接加载 chat.deepseek.com
+            // 这里使用一个示例URL代替
+            frame.src = "https://httpbin.org/headers";
+
+            // 模拟响应
+            setTimeout(() => {
+              statusElement.textContent = "部分完成（受浏览器限制）";
+              statusElement.className = "error";
+              responseElement.textContent =
+                "已发送自定义头部，但浏览器限制了某些安全头的修改。无法绕过X-Frame-Options或CSP保护。";
+            }, 1500);
+          } catch (error) {
+            statusElement.textContent = "错误";
+            statusElement.className = "error";
+            responseElement.textContent = error.message;
+          }
+        });
+    </script>
+  </body>
+</html>

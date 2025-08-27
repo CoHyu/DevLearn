@@ -35,7 +35,9 @@ class StrongPasswdSpawn:
 
             # 打乱顺序，防止前 4 位固定模式
             secrets.SystemRandom().shuffle(password)
-        
-            print(f"[+] YourPASSWORD: " + ''.join(password))
+            
+            result = ''.join(password)
+            print(f"[+] YourPASSWORD: {result}")
         except Exception as e:
             print(f"[-] {e}")
+            return None
